@@ -35,6 +35,7 @@
 			@param {function} onSuccess - Called on successful initialization with an ThreeARScene object.
 			@param {function} onError - Called if the initialization fails with the error encountered.
 		*/
+
 		ARController.getUserMediaThreeScene = function(configuration) {
 			var obj = {};
 			for (var i in configuration) {
@@ -114,7 +115,7 @@
 			var scene = new THREE.Scene();
 			var camera = new THREE.Camera();
 			camera.matrixAutoUpdate = false;
-			camera.projectionMatrix.fromArray(this.getCameraMatrix());
+			setProjectionMatrix(camera.projectionMatrix, this.getCameraMatrix());
 
 			scene.add(camera);
 
@@ -257,7 +258,7 @@
 
 				}
 				if (obj) {
-					obj.matrix.fromArray(ev.data.matrix);
+					setProjectionMatrix(obj.matrix, ev.data.matrix);
 					obj.visible = true;
 				}
 			});
@@ -283,7 +284,7 @@
 				var obj = this.threeMultiMarkers[marker];
 				if (obj && obj.markers && obj.markers[subMarkerID]) {
 					var sub = obj.markers[subMarkerID];
-					sub.matrix.fromArray(ev.data.matrix);
+					setProjectionMatrix(sub.matrix, ev.data.matrix);
 					sub.visible = (subMarker.visible >= 0);
 				}
 			});
@@ -306,6 +307,17 @@
 
 	};
 
+	/**
+	 * Helper Method for Three.js compatibility
+	 */
+	var setProjectionMatrix = function(projectionMatrix, value) {
+		if (typeof projectionMatrix.elements.set === "function") {
+			projectionMatrix.elements.set(value);
+		} else {
+			projectionMatrix.elements = [].slice.call(value);
+		}
+	};
+
 
 	var tick = function() {
 		if (window.ARController && window.THREE) {
@@ -315,7 +327,7 @@
 			}
 		} else {
 			setTimeout(tick, 50);
-		}			
+		}
 	};
 
 	tick();
